@@ -11,7 +11,7 @@ model-json makes exporting/importing the models and transformers files to/from J
 
 ## Install
 ```
-pip install git+https://github.com/FireFlyTy/sklearn-json@th/test
+pip install git+https://github.com/FireFlyTy/datrics-model-json
 ```
 ## Example Usage
 
