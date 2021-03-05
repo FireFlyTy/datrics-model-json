@@ -78,4 +78,4 @@ sklearn-json requires scikit-learn >= 0.21.3.
 
 
 # Example
-   * [I'm a relative reference to a repository file](../blob/master/LICENSE)
+   * [SKLEARN-TO-JSON Notebook](../examples/SKLEARN-TO-JSON.ipynb)
