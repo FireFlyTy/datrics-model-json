@@ -8,11 +8,33 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier,
 from sklearn.naive_bayes import BernoulliNB, GaussianNB, MultinomialNB, ComplementNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import LabelBinarizer
-from sklearn_json import regression
-from sklearn_json import csr
+from datrics_json import regression
+from datrics_json import csr
+import lightgbm as lgbm
 
-import json
+class LGBM_Classifier_Booster():
+    def __init__(self, classes=None, booster=None):
+        self.classes = np.array(classes)
+        self.booster = lgbm.Booster(model_str=booster)
 
+    def predict(self, X):
+        return self.classes[np.argmax(self.booster.predict(X), axis=1)]
+
+    def predict_proba(self, X):
+        return self.booster.predict(X)
+
+
+class LGBM_Binary_Booster():
+    def __init__(self, classes=None, booster=None):
+        self.classes = np.array(classes)
+        self.booster = lgbm.Booster(model_str=booster)
+
+    def predict(self, X):
+        probas = np.array(list(map(lambda x: [1 - x, x], self.booster.predict(X).tolist())))
+        return self.classes[np.argmax(probas, axis=1)]
+
+    def predict_proba(self, X):
+        return self.booster.predict(X)
 
 def serialize_logistic_regression(model):
     serialized_model = {
@@ -214,13 +236,14 @@ def serialize_svm(model):
         'class_weight_': model.class_weight_.tolist(),
         'classes_': model.classes_.tolist(),
         'support_': model.support_.tolist(),
-        'n_support_': model.n_support_.tolist(),
+        '_n_support': model.n_support_.tolist(),
         'intercept_': model.intercept_.tolist(),
-        'probA_': model.probA_.tolist(),
-        'probB_': model.probB_.tolist(),
+        '_probA': model.probA_.tolist(),
+        '_probB': model.probB_.tolist(),
         '_intercept_': model._intercept_.tolist(),
         'shape_fit_': model.shape_fit_,
         '_gamma': model._gamma,
+        '_sparse':model._sparse,
         'params': model.get_params()
     }
 
@@ -250,10 +273,11 @@ def deserialize_svm(model_dict):
     model.class_weight_ = np.array(model_dict['class_weight_']).astype(np.float64)
     model.classes_ = np.array(model_dict['classes_'])
     model.support_ = np.array(model_dict['support_']).astype(np.int32)
-    model.n_support_ = np.array(model_dict['n_support_']).astype(np.int32)
+    model._n_support = np.array(model_dict['_n_support']).astype(np.int32)
     model.intercept_ = np.array(model_dict['intercept_']).astype(np.float64)
-    model.probA_ = np.array(model_dict['probA_']).astype(np.float64)
-    model.probB_ = np.array(model_dict['probB_']).astype(np.float64)
+    model._probA = np.array(model_dict['_probA']).astype(np.float64)
+    model._probB = np.array(model_dict['_probB']).astype(np.float64)
+    model._sparse = model_dict['_sparse']
     model._intercept_ = np.array(model_dict['_intercept_']).astype(np.float64)
 
     if 'meta' in model_dict['support_vectors_'] and model_dict['support_vectors_']['meta'] == 'csr':
@@ -553,3 +577,38 @@ def deserialize_mlp(model_dict):
     model.classes_ = np.array(model_dict['classes_'])
 
     return model
+
+
+def serialize_lgbm_classifier(model):
+    if model.objective == 'multiclass':
+        suffix = "multiclass"
+    else:
+        suffix = "binary"
+
+    if model.boosting == 'rf':
+        prefix = "rf"
+    else:
+        prefix = "lgbm"
+
+    serialized_model = {
+        "meta":prefix+'_'+suffix,
+        "classes":model.classes_.tolist(),
+        "model":model.booster_.dump_model(),
+        "booster":model.booster_.model_to_string()
+    }
+
+
+    return serialized_model
+
+def deserialize_lgbm_classifier(model_dict):
+    model = LGBM_Classifier_Booster(model_dict['classes'], model_dict['booster'])
+    return model
+
+def deserialize_lgbm_binary(model_dict):
+    model = LGBM_Binary_Booster(model_dict['classes'], model_dict['booster'])
+    return model
+
+
+
+
+

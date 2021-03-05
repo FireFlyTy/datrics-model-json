@@ -1,13 +1,21 @@
-from sklearn.linear_model import LinearRegression, Lasso, Ridge
+from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, _gb_losses
 from sklearn.neural_network import MLPRegressor
 from sklearn.tree._tree import Tree
 from sklearn.svm import SVR
 from sklearn import dummy
-from sklearn_json import csr
+from datrics_json import csr
 import numpy as np
 import scipy as sp
+import lightgbm as lgbm
+
+class LGBM_Regression_Booster():
+    def __init__(self, booster=None):
+        self.booster = lgbm.Booster(model_str=booster)
+
+    def predict(self, X):
+        return self.booster.predict(X)
 
 
 def serialize_linear_regressor(model):
@@ -42,7 +50,7 @@ def serialize_lasso_regressor(model):
     else:
         serialized_model['n_iter_'] = model.n_iter_.tolist()
 
-    if isinstance(model.n_iter_, float):
+    if isinstance(model.intercept_, float):
         serialized_model['intercept_'] = model.intercept_
     else:
         serialized_model['intercept_'] = model.intercept_.tolist()
@@ -67,6 +75,44 @@ def deserialize_lasso_regressor(model_dict):
 
     return model
 
+def serialize_elastic_regressor(model):
+    serialized_model = {
+        'meta': 'elasticnet-regression',
+        'coef_': model.coef_.tolist(),
+        'alpha': model.alpha,
+        'params': model.get_params()
+    }
+
+    if isinstance(model.n_iter_, int):
+        serialized_model['n_iter_'] = model.n_iter_
+    else:
+        serialized_model['n_iter_'] = model.n_iter_.tolist()
+
+    if isinstance(model.intercept_, float):
+        serialized_model['intercept_'] = model.intercept_
+    else:
+        serialized_model['intercept_'] = model.intercept_.tolist()
+
+    return serialized_model
+
+def deserialize_elastic_regressor(model_dict):
+    model = ElasticNet(model_dict['params'])
+
+    model.coef_ = np.array(model_dict['coef_'])
+    model.alpha = np.array(model_dict['alpha']).astype(np.float)
+
+    if isinstance(model_dict['n_iter_'], list):
+        model.n_iter_ = np.array(model_dict['n_iter_'])
+    else:
+        model.n_iter_ = int(model_dict['n_iter_'])
+
+    if isinstance(model_dict['intercept_'], list):
+        model.intercept_ = np.array(model_dict['intercept_'])
+    else:
+        model.intercept_ = float(model_dict['intercept_'])
+
+    return model
+
 
 def serialize_ridge_regressor(model):
     serialized_model = {
@@ -78,7 +124,7 @@ def serialize_ridge_regressor(model):
     if model.n_iter_:
         serialized_model['n_iter_'] = model.n_iter_.tolist()
 
-    if isinstance(model.n_iter_, float):
+    if isinstance(model.intercept_, float):
         serialized_model['intercept_'] = model.intercept_
     else:
         serialized_model['intercept_'] = model.intercept_.tolist()
@@ -370,4 +416,23 @@ def deserialize_mlp_regressor(model_dict):
     model.n_outputs_ = model_dict['n_outputs_']
     model.out_activation_ = model_dict['out_activation_']
 
+    return model
+
+def serialize_lgbm_regressor(model):
+
+    if model.boosting == 'rf':
+        prefix = "rf"
+    else:
+        prefix = "lgbm"
+
+    serialized_model = {
+        "meta":prefix+'_'+'regressor',
+        "model":model.booster_.dump_model(),
+        "booster":model.booster_.model_to_string()
+    }
+
+    return serialized_model
+
+def deserialize_lgbm_regressor(model_dict):
+    model = LGBM_Regression_Booster(model_dict['booster'])
     return model

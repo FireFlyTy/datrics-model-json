@@ -1,14 +1,21 @@
-from sklearn_json import classification as clf
-from sklearn_json import regression as reg
+from datrics_json import classification as clf
+from datrics_json import regression as reg
+from datrics_json import unsupervized as clst
 from sklearn import svm, discriminant_analysis, dummy
 from sklearn.linear_model import LogisticRegression, Perceptron
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, RandomForestRegressor, GradientBoostingRegressor, _gb_losses
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, RandomForestRegressor, \
+    GradientBoostingRegressor, _gb_losses
 from sklearn.naive_bayes import BernoulliNB, GaussianNB, MultinomialNB, ComplementNB
-from sklearn.linear_model import LinearRegression, Lasso, Ridge
+from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet
 from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.svm import SVR
+from sklearn.cluster import KMeans, DBSCAN
+import lightgbm as lgbm
 import json
+from dask_ml.preprocessing import OneHotEncoder, LabelEncoder, MinMaxScaler
+
+from sklearn.ensemble import IsolationForest
 
 __version__ = '0.1.0'
 
@@ -40,11 +47,12 @@ def serialize_model(model):
         return clf.serialize_random_forest(model)
     elif isinstance(model, MLPClassifier):
         return clf.serialize_mlp(model)
-
     elif isinstance(model, LinearRegression):
         return reg.serialize_linear_regressor(model)
     elif isinstance(model, Lasso):
         return reg.serialize_lasso_regressor(model)
+    elif isinstance(model, ElasticNet):
+        return reg.serialize_elastic_regressor(model)
     elif isinstance(model, Ridge):
         return reg.serialize_ridge_regressor(model)
     elif isinstance(model, SVR):
@@ -57,6 +65,22 @@ def serialize_model(model):
         return reg.serialize_random_forest_regressor(model)
     elif isinstance(model, MLPRegressor):
         return reg.serialize_mlp_regressor(model)
+    elif isinstance(model, KMeans ):
+        return clst.serialize_kmeans_clustering(model)
+    elif isinstance(model, DBSCAN):
+        return clst.serialize_dbscan_clustering(model)
+    elif isinstance(model, lgbm.LGBMClassifier):
+        return clf.serialize_lgbm_classifier(model)
+    elif isinstance(model, lgbm.LGBMRegressor):
+        return reg.serialize_lgbm_regressor(model)
+    elif isinstance(model, IsolationForest):
+        return clst.serialize_iforest(model)
+    elif isinstance(model, LabelEncoder):
+        return clst.serialize_label_encoder(model)
+    elif isinstance(model, OneHotEncoder):
+        return clst.serialize_onehot_encoder(model)
+    elif isinstance(model, MinMaxScaler):
+        return clst.serialize_min_max_scaler(model)
     else:
         raise ModellNotSupported('This model type is not currently supported. Email support@mlrequest.com to request a feature or report a bug.')
 
@@ -88,9 +112,10 @@ def deserialize_model(model_dict):
         return clf.deserialize_random_forest(model_dict)
     elif model_dict['meta'] == 'mlp':
         return clf.deserialize_mlp(model_dict)
-
     elif model_dict['meta'] == 'linear-regression':
         return reg.deserialize_linear_regressor(model_dict)
+    elif model_dict['meta'] == 'elasticnet-regression':
+        return reg.deserialize_elastic_regressor(model_dict)
     elif model_dict['meta'] == 'lasso-regression':
         return reg.deserialize_lasso_regressor(model_dict)
     elif model_dict['meta'] == 'ridge-regression':
@@ -105,6 +130,24 @@ def deserialize_model(model_dict):
         return reg.deserialize_random_forest_regressor(model_dict)
     elif model_dict['meta'] == 'mlp-regression':
         return reg.deserialize_mlp_regressor(model_dict)
+    elif model_dict['meta'] == 'kmeans_clustering':
+        return clst.deserialize_kmeans_clustering(model_dict)
+    elif model_dict['meta'] == 'dbscan_clustering':
+        return clst.deserialize_dbscan_clustering(model_dict)
+    elif model_dict['meta'] in ['lgbm_multiclass', 'rf_multiclass']:
+        return clf.deserialize_lgbm_classifier(model_dict)
+    elif model_dict['meta'] in ['lgbm_binary', 'rf_binary']:
+        return clf.deserialize_lgbm_binary(model_dict)
+    elif model_dict['meta'] in ['lgbm_regressor', 'rf_regressor']:
+        return reg.deserialize_lgbm_regressor(model_dict)
+    elif model_dict['meta'] == 'iforest_anomaly':
+        return clst.deserialize_iforest(model_dict)
+    elif model_dict['meta'] == 'label_encoder':
+        return clst.deserialize_label_encoder(model_dict)
+    elif model_dict['meta'] == 'onehot_encoder':
+        return clst.deserialize_onehot_encoder(model_dict)
+    elif model_dict['meta'] == 'min_max_scaler':
+        return clst.deserialize_min_max_scaler(model_dict)
     else:
         raise ModellNotSupported('Model type not supported or corrupt JSON file. Email support@mlrequest.com to request a feature or report a bug.')
 
