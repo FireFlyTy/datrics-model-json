@@ -1,1 +1,23 @@
-{"meta": "label_encoder", "dictionary": {"values": ["Iris-setosa", "Iris-versicolor", "Iris-virginica"], "labels": [0, 1, 2]}, "params": {"use_categorical": true}, "classes_": ["Iris-setosa", "Iris-versicolor", "Iris-virginica"]}
+{
+  "meta": "label_encoder",
+  "dictionary": {
+    "values": [
+      "Iris-setosa",
+      "Iris-versicolor",
+      "Iris-virginica"
+    ],
+    "labels": [
+      0,
+      1,
+      2
+    ]
+  },
+  "params": {
+    "use_categorical": true
+  },
+  "classes_": [
+    "Iris-setosa",
+    "Iris-versicolor",
+    "Iris-virginica"
+  ]
+}

@@ -1,1 +1,33 @@
-{"meta": "onehot_encoder", "dictionary": {"data_Iris-setosa": {"0": 1.0, "1": 0.0, "2": 0.0}, "data_Iris-versicolor": {"0": 0.0, "1": 1.0, "2": 0.0}, "data_Iris-virginica": {"0": 0.0, "1": 0.0, "2": 1.0}}, "params": {"categories": "auto", "drop": null, "sparse": true, "handle_unknown": "error"}, "categories_": [["Iris-setosa", "Iris-versicolor", "Iris-virginica"]]}
+{
+  "meta": "onehot_encoder",
+  "dictionary": {
+    "data_Iris-setosa": {
+      "0": 1.0,
+      "1": 0.0,
+      "2": 0.0
+    },
+    "data_Iris-versicolor": {
+      "0": 0.0,
+      "1": 1.0,
+      "2": 0.0
+    },
+    "data_Iris-virginica": {
+      "0": 0.0,
+      "1": 0.0,
+      "2": 1.0
+    }
+  },
+  "params": {
+    "categories": "auto",
+    "drop": null,
+    "sparse": true,
+    "handle_unknown": "error"
+  },
+  "categories_": [
+    [
+      "Iris-setosa",
+      "Iris-versicolor",
+      "Iris-virginica"
+    ]
+  ]
+}
