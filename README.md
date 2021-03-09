@@ -36,9 +36,9 @@ sklearn-json requires scikit-learn >= 0.21.3.
 
 * Classification
     * **`sklearn.linear_model.LogisticRegression`**
-    * **`sklearn.linear_model.Perceptron`**
-    * **`sklearn.discriminant_analysis.LinearDiscriminantAnalysis`**
-    * **`sklearn.discriminant_analysis.QuadraticDiscriminantAnalysis`**
+    * *`sklearn.linear_model.Perceptron`*
+    * *`sklearn.discriminant_analysis.LinearDiscriminantAnalysis`*
+    * *`sklearn.discriminant_analysis.QuadraticDiscriminantAnalysis`*
     * **`sklearn.svm.SVC`**
     * **`sklearn.ensemble.IsolationForest`**
     * **`sklearn.clustering.KMeans`**
